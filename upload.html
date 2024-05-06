@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload File CSV</title>
+</head>
+<body>
+    <h1>Upload File CSV</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept=".csv">
+        <button type="submit">Upload</button>
+    </form>
+
+    <a href="index.html">Beranda</a>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js';
+        import { getFirestore, collection, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes } from 'https://www.gstatic.com/firebasejs/9.6.0/firebase-storage.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCT2xu39-AfZKv1KDI3isG5xDZkm9kZoPw",
+            authDomain: "projectdp3ak.firebaseapp.com",
+            projectId: "projectdp3ak",
+            storageBucket: "projectdp3ak.appspot.com",
+            messagingSenderId: "602000338998",
+            appId: "1:602000338998:web:f33f8953b3690c67efa897"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        console.log('db:', db); // Tambahkan ini untuk memeriksa nilai db
+
+        const storage = getStorage(app);
+
+        window.onload = function () {
+            if (window.location.pathname.includes('index.html')) {
+                const fileList = document.getElementById('fileList');
+                getDocs(collection(db, "files")).then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const listItem = document.createElement('li');
+                        listItem.textContent = data.name;
+                        listItem.onclick = () => window.open(data.url, '_blank');
+                        fileList.appendChild(listItem);
+                    });
+                });
+            } else if (window.location.pathname.includes('upload.html')) {
+                document.getElementById('uploadForm').onsubmit = async function (event) {
+                    event.preventDefault();
+                    const file = document.getElementById('fileInput').files[0];
+                    const storageRef = ref(storage, `csv/${file.name}`);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    const downloadURL = `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${encodeURIComponent(snapshot.metadata.fullPath)}?alt=media`;
+
+                    addDoc(collection(db, "files"), {
+                        name: file.name,
+                        url: downloadURL
+                    }).then((docRef) => {
+                        console.log("Document written with ID: ", docRef.id);
+                    }).catch((error) => {
+                        console.error("Error adding document: ", error);
+                    });
+                };
+            }
+        };
+            
+    </script>
+</body>
+</html>
