@@ -1,5 +1,3 @@
-// app.js - Kode sisi klien
-
 // Fungsi untuk memuat dan menampilkan CSV
 async function loadAndDisplayCsv(url) {
     const apiUrl = `/api${url.split('https://firebasestorage.googleapis.com')[1]}`;
@@ -10,13 +8,13 @@ async function loadAndDisplayCsv(url) {
 
 // Memuat data saat dokumen siap
 document.addEventListener('DOMContentLoaded', function () {
-    fetch('/files').then(response => response.json())
+    fetch('/api/files').then(response => response.json())
         .then(data => {
             const fileList = document.getElementById('fileList');
             data.forEach(file => {
                 const listItem = document.createElement('li');
                 listItem.textContent = file.name;
-                listItem.onclick = () => window.open(file.url, '_blank');
+                listItem.onclick = () => loadAndDisplayCsv(file.url);
                 fileList.appendChild(listItem);
             });
         }).catch(error => {
