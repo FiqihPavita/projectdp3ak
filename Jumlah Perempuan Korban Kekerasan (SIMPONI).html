@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk mengambil dan menampilkan data CSV berdasarkan tahun tertentu
   function fetchAndDisplayCSV(year) {
-    const fileName = `Jumlah Perempuan Korban Kekerasan (SIMPONI)${year}.csv`;
+    const fileName = `KTP${year}.csv`;
     currentFileName = fileName;
     const storageRef = storage.ref(fileName);
 
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Menambahkan peringatan di atas tempat unggah
     const warningText = document.createElement('p');
-    warningText.textContent = "Pastikan bahwa nama file csv Jumlah Perempuan Korban Kekerasan (SIMPONI)(tahun). Contoh: Jumlah Perempuan Korban Kekerasan (SIMPONI)2020";
+    warningText.textContent = "Pastikan bahwa nama file csv Jumlah Perempuan Korban Kekerasan KTP(tahun). Contoh: KTP2020";
     uploadButtonContainer.appendChild(warningText);
 
     // Membuat tombol unggah
