@@ -70,6 +70,11 @@
     font-size: 16px;
     cursor: pointer;
   }
+
+  .warning-text, .template-text {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -144,8 +149,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Menambahkan peringatan di atas tempat unggah
     const warningText = document.createElement('p');
-    warningText.textContent = "Pastikan bahwa nama file csv Jumlah Perempuan Korban Kekerasan KTP(tahun). Contoh: KTP2020";
+    warningText.className = 'warning-text';
+    warningText.textContent = "Pastikan bahwa nama file csv KTP(tahun). Contoh: KTP2020";
     uploadButtonContainer.appendChild(warningText);
+
+    // Membuat tombol untuk mengunduh template
+    const downloadTemplateButton = document.createElement('button');
+    downloadTemplateButton.textContent = 'Download Template';
+    downloadTemplateButton.addEventListener('click', downloadTemplateCSV);
+    uploadButtonContainer.appendChild(downloadTemplateButton);
 
     // Membuat tombol unggah
     const uploadButton = document.createElement('input');
@@ -242,14 +254,14 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Fungsi untuk menggambar grafik
-  function drawChart(data, containerId, sortAscending = true) {
-    const chartData = [['Kab/Kota', 'Jumlah Perempuan Korban Kekerasan', { role: 'annotation' }]];
+  function drawChart(data, containerId, sortAscending) {
+    const chartData = [['Kab/Kota', 'KTP', { role: 'annotation' }]];
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       if (row.length >= 3) {
-        const jumlahperempuankorbankekerasanValue = parseFloat(row[2]);
-        chartData.push([row[1], jumlahperempuankorbankekerasanValue, jumlahperempuankorbankekerasanValue.toString()]);
+        const ipgValue = parseFloat(row[2]);
+        chartData.push([row[1], ipgValue, ipgValue.toString()]);
       }
     }
 
@@ -262,8 +274,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const googleData = google.visualization.arrayToDataTable(chartData);
 
     const options = {
-      title: 'Jumlah Perempuan Korban Kekerasan per Kab/Kota',
-      hAxis: { title: 'Jumlah Perempuan Korban Kekerasan' },
+      title: 'KTP per Kab/Kota',
+      hAxis: { title: 'KTP' },
       vAxis: { title: 'Kab/Kota', textStyle: { fontSize: 12 }, slantedText: true, slantedTextAngle: 45 },
       legend: { position: 'none' },
       annotations: {
@@ -288,18 +300,18 @@ document.addEventListener("DOMContentLoaded", function() {
       const row = data[i];
       if (row.length >= 3) {
         const year = row[0];
-        const jumlahperempuankorbankekerasanJatim = parseFloat(row[1]);
-        const jumlahperempuankorbankekerasanNasional = parseFloat(row[2]);
-        chartData.push([year, jumlahperempuankorbankekerasanJatim, jumlahperempuankorbankekerasanJatim.toString(), jumlahperempuankorbankekerasanNasional, jumlahperempuankorbankekerasanNasional.toString()]);
+        const ipgJatim = parseFloat(row[1]);
+        const ipgNasional = parseFloat(row[2]);
+        chartData.push([year, ipgJatim, ipgJatim.toString(), ipgNasional, ipgNasional.toString()]);
       }
     }
 
     const googleData = google.visualization.arrayToDataTable(chartData);
 
     const options = {
-      title: 'Perbandingan Jumlah Perempuan Korban Kekerasan (SIMPONI) Jawa Timur dan Nasional',
+      title: 'Perbandingan KTP Jawa Timur dan Nasional',
       hAxis: { title: 'Tahun' },
-      vAxis: { title: 'Jumlah Perempuan Korban Kekerasan (SIMPONI)' },
+      vAxis: { title: 'KTP' },
       legend: { position: 'bottom' },
       height: 400,
       width: 1200,
@@ -317,7 +329,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk mengambil dan menampilkan data CSV untuk bar chart
   function fetchAndDisplayBarChart() {
-    const fileName = 'Jumlah Perempuan Korban Kekerasan (SIMPONI) Jatim Nasional.csv';
+    const fileName = 'KTP Jatim Nasional.csv';
     const storageRef = storage.ref(fileName);
 
     storageRef.getDownloadURL().then(function(url) {
@@ -332,6 +344,24 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }).catch(function(error) {
       console.error(error);
+    });
+  }
+
+  // Fungsi untuk mengunduh template CSV
+  function downloadTemplateCSV() {
+    const fileName = 'TemplateKTP.csv';
+    const storageRef = storage.ref(fileName);
+
+    storageRef.getDownloadURL().then(function(url) {
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }).catch(function(error) {
+      console.error('Error downloading template:', error);
     });
   }
 
