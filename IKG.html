@@ -70,6 +70,11 @@
     font-size: 16px;
     cursor: pointer;
   }
+
+  .warning-text, .template-text {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -144,8 +149,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Menambahkan peringatan di atas tempat unggah
     const warningText = document.createElement('p');
+    warningText.className = 'warning-text';
     warningText.textContent = "Pastikan bahwa nama file csv IKG(tahun). Contoh: IKG2020";
     uploadButtonContainer.appendChild(warningText);
+
+    // Membuat tombol untuk mengunduh template
+    const downloadTemplateButton = document.createElement('button');
+    downloadTemplateButton.textContent = 'Download Template';
+    downloadTemplateButton.addEventListener('click', downloadTemplateCSV);
+    uploadButtonContainer.appendChild(downloadTemplateButton);
 
     // Membuat tombol unggah
     const uploadButton = document.createElement('input');
@@ -242,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Fungsi untuk menggambar grafik
-  function drawChart(data, containerId, sortAscending = true) {
+  function drawChart(data, containerId, sortAscending) {
     const chartData = [['Kab/Kota', 'IKG', { role: 'annotation' }]];
 
     for (let i = 1; i < data.length; i++) {
@@ -288,16 +300,16 @@ document.addEventListener("DOMContentLoaded", function() {
       const row = data[i];
       if (row.length >= 3) {
         const year = row[0];
-        const ikgJatim = parseFloat(row[1]);
-        const ikgNasional = parseFloat(row[2]);
-        chartData.push([year, ikgJatim, ikgJatim.toString(), ikgNasional, ikgNasional.toString()]);
+        const ipgJatim = parseFloat(row[1]);
+        const ipgNasional = parseFloat(row[2]);
+        chartData.push([year, ipgJatim, ipgJatim.toString(), ipgNasional, ipgNasional.toString()]);
       }
     }
 
     const googleData = google.visualization.arrayToDataTable(chartData);
 
     const options = {
-      title: 'Perbandingan IPG Jawa Timur dan Nasional',
+      title: 'Perbandingan IKG Jawa Timur dan Nasional',
       hAxis: { title: 'Tahun' },
       vAxis: { title: 'IKG' },
       legend: { position: 'bottom' },
@@ -332,6 +344,24 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }).catch(function(error) {
       console.error(error);
+    });
+  }
+
+  // Fungsi untuk mengunduh template CSV
+  function downloadTemplateCSV() {
+    const fileName = 'TemplateIKG.csv';
+    const storageRef = storage.ref(fileName);
+
+    storageRef.getDownloadURL().then(function(url) {
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }).catch(function(error) {
+      console.error('Error downloading template:', error);
     });
   }
 

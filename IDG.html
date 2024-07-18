@@ -70,6 +70,11 @@
     font-size: 16px;
     cursor: pointer;
   }
+
+  .warning-text, .template-text {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -144,8 +149,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Menambahkan peringatan di atas tempat unggah
     const warningText = document.createElement('p');
+    warningText.className = 'warning-text';
     warningText.textContent = "Pastikan bahwa nama file csv IDG(tahun). Contoh: IDG2020";
     uploadButtonContainer.appendChild(warningText);
+
+    // Membuat tombol untuk mengunduh template
+    const downloadTemplateButton = document.createElement('button');
+    downloadTemplateButton.textContent = 'Download Template';
+    downloadTemplateButton.addEventListener('click', downloadTemplateCSV);
+    uploadButtonContainer.appendChild(downloadTemplateButton);
 
     // Membuat tombol unggah
     const uploadButton = document.createElement('input');
@@ -242,8 +254,8 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Fungsi untuk menggambar grafik
-  function drawChart(data, containerId, sortAscending = true) {
-    const chartData = [['Kab/Kota', 'IPG', { role: 'annotation' }]];
+  function drawChart(data, containerId, sortAscending) {
+    const chartData = [['Kab/Kota', 'IDG', { role: 'annotation' }]];
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
@@ -335,6 +347,24 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
+  // Fungsi untuk mengunduh template CSV
+  function downloadTemplateCSV() {
+    const fileName = 'TemplateIDG.csv';
+    const storageRef = storage.ref(fileName);
+
+    storageRef.getDownloadURL().then(function(url) {
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }).catch(function(error) {
+      console.error('Error downloading template:', error);
+    });
+  }
+
   // Fungsi untuk menampilkan tombol sort
   function displaySortButtons() {
     const sortButtonsDiv = document.createElement('div');
@@ -380,4 +410,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
