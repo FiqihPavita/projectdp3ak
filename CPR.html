@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk menggambar grafik
   function drawChart(data, containerId, sortAscending = true) {
-    const chartData = [['Kab/Kota', 'CPR', { role: 'annotation' }]];
+    const chartData = [['Kab/Kota', 'mCPR%', { role: 'annotation' }]];
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];

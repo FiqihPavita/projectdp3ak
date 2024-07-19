@@ -335,7 +335,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk mengambil dan menampilkan data CSV berdasarkan tahun tertentu
   function fetchAndDisplayCSV(year) {
-    const fileName = `KTA${year}.csv`;
+    const fileName = `Jumlah Pengaduan${year}.csv`;
     currentFileName = fileName;
     const storageRef = storage.ref(fileName);
 
@@ -482,7 +482,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk menggambar grafik
   function drawChart(data, containerId) {
-    const chartData = [['Kab/Kota', 'KTA']];
+    const chartData = [['Jenis', 'Total']];
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
@@ -494,9 +494,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const googleData = google.visualization.arrayToDataTable(chartData);
 
     const options = {
-      title: 'KTA per Kab/Kota',
-      hAxis: { title: 'Kab/Kota', slantedText: true, slantedTextAngle: 45 },
-      vAxis: { title: 'KTA' },
+      title: 'Jumlah Pengaduan',
+      hAxis: { title: 'Jenis', slantedText: true, slantedTextAngle: 45 },
+      vAxis: { title: 'Total' },
       legend: { position: 'bottom' },
     };
 
