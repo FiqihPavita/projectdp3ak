@@ -103,6 +103,9 @@ document.addEventListener("DOMContentLoaded", function() {
         displayCSVData(csvData, 'csvData');
         drawChart(csvData, 'curve_chart', isSortedAscending);
         displaySortButtons(); // Panggil fungsi untuk menampilkan tombol sort
+
+        // Selalu tampilkan grafik bar chart
+        fetchAndDisplayBarChart();
       })
       .catch(function(error) {
         console.error(error);
@@ -282,22 +285,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk menggambar bar chart untuk perbandingan
   function drawBarChart(data, containerId) {
-    const chartData = [['Tahun', 'Jawa Timur', { role: 'annotation' }, 'Nasional', { role: 'annotation' }]];
+    const chartData = [['Tahun', 'Target', { role: 'annotation' }, 'Capaian', { role: 'annotation' }]];
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       if (row.length >= 3) {
         const year = row[0];
-        const tfrJatim = parseFloat(row[1]);
-        const tfrNasional = parseFloat(row[2]);
-        chartData.push([year, tfrJatim, tfrJatim.toString(), tfrNasional, tfrNasional.toString()]);
+        const tfrTarget = parseFloat(row[1]);
+        const tfrCapaian = parseFloat(row[2]);
+        chartData.push([year, tfrTarget, tfrTarget.toString(), tfrCapaian, tfrCapaian.toString()]);
       }
     }
 
     const googleData = google.visualization.arrayToDataTable(chartData);
 
     const options = {
-      title: 'Perbandingan TFR Jawa Timur dan Nasional',
+      title: 'Perbandingan TFR Target dan Capaian',
       hAxis: { title: 'Tahun' },
       vAxis: { title: 'TFR' },
       legend: { position: 'bottom' },
@@ -315,21 +318,21 @@ document.addEventListener("DOMContentLoaded", function() {
     chart.draw(googleData, options);
   }
 
-  // Fungsi untuk mengambil dan menampilkan data CSV untuk bar chart
   function fetchAndDisplayBarChart() {
     const fileName = 'Target, Capaian, dan Sumber TFR.csv';
     const storageRef = storage.ref(fileName);
 
     storageRef.getDownloadURL().then(function(url) {
       fetch(url)
-      .then(response => response.text())
-      .then(data => {
-        const csvData = parseCSVData(data);
-        drawBarChart(csvData, 'bar_chart');
-      })
-      .catch(function(error) {
-        console.error(error);
-      });
+        .then(response => response.text())
+        .then(data => {
+          const csvData = parseCSVData(data);
+          displayCSVData(csvData, 'dataDisplay'); // Tampilkan data di elemen dataDisplay
+          drawBarChart(csvData, 'bar_chart');
+        })
+        .catch(function(error) {
+          console.error(error);
+        });
     }).catch(function(error) {
       console.error(error);
     });
@@ -375,6 +378,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <h1>Data CSV</h1>
 <div id="csvData"></div>
+<div id="dataDisplay"></div> <!-- Tambahkan elemen ini untuk menampilkan data -->
 <div id="curve_chart" style="width: 100%; height: 800px;"></div>
 <div id="bar_chart" style="width: 100%; height: 400px;"></div>
 
