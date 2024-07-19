@@ -335,7 +335,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk mengambil dan menampilkan data CSV berdasarkan tahun tertentu
   function fetchAndDisplayCSV(year) {
-    const fileName = `KTA${year}.csv`;
+    const fileName = `Jumlah Kasus Kekerasan Perempuan${year}.csv`;
     currentFileName = fileName;
     const storageRef = storage.ref(fileName);
 
@@ -482,7 +482,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk menggambar grafik
   function drawChart(data, containerId) {
-    const chartData = [['Kab/Kota', 'KTA']];
+    const chartData = [['Jenis Kasus', 'Perempuan']];
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
