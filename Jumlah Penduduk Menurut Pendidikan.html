@@ -192,6 +192,8 @@ nav ul li a span.rotate{
         <ul class="item-show-3">
           <li><a href="IPA.html"class="ipa">IPA</a></li>
           <li><a href="KTA.html"class="kta">KTA</a></li>
+          <li><a href="IPHA.html"class="ipha">IPHA</a></li>
+          <li><a href="IPKA.html"class="ipka">IPKA</a></li>
       </ul>
       </li>
       <li> 
@@ -257,6 +259,7 @@ nav ul li a span.rotate{
 </body>
 </html>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -315,6 +318,25 @@ nav ul li a span.rotate{
   #curve_chart {
     margin-top: -20px; /* Atur margin atas */
   }
+
+  #bar_chart {
+    margin-top: 20px; /* Atur margin atas */
+  }
+
+  #sort-buttons {
+    margin-bottom: 20px;
+  }
+
+  #sort-buttons button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .warning-text, .template-text {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -332,10 +354,11 @@ document.addEventListener("DOMContentLoaded", function() {
   const storage = firebase.storage();
   let csvData = [];
   let currentFileName = '';
+  let isSortedAscending = true;
 
   // Fungsi untuk mengambil dan menampilkan data CSV berdasarkan tahun tertentu
   function fetchAndDisplayCSV(year) {
-    const fileName = `KTA${year}.csv`;
+    const fileName = `Jumlah Penduduk Menurut Pendidikan${year}.csv`;
     currentFileName = fileName;
     const storageRef = storage.ref(fileName);
 
@@ -345,7 +368,8 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(data => {
         csvData = parseCSVData(data);
         displayCSVData(csvData, 'csvData');
-        drawChart(csvData, 'curve_chart');
+        drawChart(csvData, 'curve_chart', isSortedAscending);
+        displaySortButtons(); // Panggil fungsi untuk menampilkan tombol sort
       })
       .catch(function(error) {
         console.error(error);
@@ -365,7 +389,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Fungsi untuk menampilkan tombol-tombol tahun
   function displayYearButtons() {
-    const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+    const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030','2031','2032'];
     const buttonsDiv = document.createElement('div');
     buttonsDiv.className = 'buttons';
 
@@ -387,8 +411,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Menambahkan peringatan di atas tempat unggah
     const warningText = document.createElement('p');
+    warningText.className = 'warning-text';
     warningText.textContent = "Pastikan bahwa nama file csv Jumlah Penduduk Menurut Pendidikan(tahun). Contoh: Jumlah Penduduk Menurut Pendidikan2020";
     uploadButtonContainer.appendChild(warningText);
+
+    // Membuat tombol untuk mengunduh template
+    const downloadTemplateButton = document.createElement('button');
+    downloadTemplateButton.textContent = 'Download Template';
+    downloadTemplateButton.addEventListener('click', downloadTemplateCSV);
+    uploadButtonContainer.appendChild(downloadTemplateButton);
 
     // Membuat tombol unggah
     const uploadButton = document.createElement('input');
@@ -450,22 +481,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const chartContainer = document.getElementById('curve_chart');
     chartContainer.innerHTML = ''; // Hapus grafik sebelumnya
+
+    const barChartContainer = document.getElementById('bar_chart');
+    barChartContainer.innerHTML = ''; // Hapus grafik sebelumnya
   }
 
   // Fungsi untuk menangani unggahan file
   function handleFileUpload(event) {
-  const file = event.target.files[0];
-  const storageRef = storage.ref(file.name);
-  storageRef.put(file).then(snapshot => {
-    alert('File uploaded successfully');
-    // Ambil tahun dari nama file yang diunggah
-    const year = file.name.match(/\d{4}/)[0];
-    // Perbarui tahun yang ditampilkan
-    fetchAndDisplayCSV(year);
-  }).catch(error => {
-    console.error('Error uploading file:', error);
-  });
-}
+    const file = event.target.files[0];
+    const storageRef = storage.ref(file.name);
+    storageRef.put(file).then(snapshot => {
+      alert('File uploaded successfully');
+      // Ambil tahun dari nama file yang diunggah
+      const year = file.name.match(/\d{4}/)[0];
+      // Perbarui tahun yang ditampilkan
+      fetchAndDisplayCSV(year);
+    }).catch(error => {
+      console.error('Error uploading file:', error);
+    });
+  }
+
   // Fungsi untuk mengunduh data CSV
   function downloadCSV(data) {
     const csvContent = data.map(e => e.join(",")).join("\n");
@@ -481,31 +516,147 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Fungsi untuk menggambar grafik
-  function drawChart(data, containerId) {
-    const chartData = [['Kab/Kota', 'KTA']];
+  function drawChart(data, containerId, sortAscending) {
+    const chartData = [['Kab/Kota', 'Jumlah Penduduk Menurut Pendidikan', { role: 'annotation' }]];
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       if (row.length >= 3) {
-        chartData.push([row[1], parseFloat(row[2])]);
+        const jumlahpendudukmenurutpendidikanValue = parseFloat(row[2]);
+        chartData.push([row[1], jumlahpendudukmenurutpendidikanValue, jumlahpendudukmenurutpendidikanValue.toString()]);
       }
+    }
+
+    if (sortAscending) {
+      chartData.sort((a, b) => (a[1] || 0) - (b[1] || 0));
+    } else {
+      chartData.sort((a, b) => (b[1] || 0) - (a[1] || 0));
     }
 
     const googleData = google.visualization.arrayToDataTable(chartData);
 
     const options = {
-      title: 'KTA per Kab/Kota',
-      hAxis: { title: 'Kab/Kota', slantedText: true, slantedTextAngle: 45 },
-      vAxis: { title: 'KTA' },
-      legend: { position: 'bottom' },
+      title: 'Jumlah Penduduk Menurut Pendidikan per Kab/Kota',
+      hAxis: { title: 'Jumlah Penduduk Menurut Pendidikan' },
+      vAxis: { title: 'Kab/Kota', textStyle: { fontSize: 12 }, slantedText: true, slantedTextAngle: 45 },
+      legend: { position: 'none' },
+      annotations: {
+        alwaysOutside: true,
+        textStyle: { fontSize: 12, color: '#000', auraColor: 'none' }
+      },
+      bar: { groupWidth: '85%' },
+      height: 800,
+      width: 1200,
+      chartArea: { height: '80%', width: '70%', left: '20%', top: '10%' }
     };
 
     const chart = new google.visualization.BarChart(document.getElementById(containerId));
     chart.draw(googleData, options);
   }
 
+  // Fungsi untuk menggambar bar chart untuk perbandingan
+  function drawBarChart(data, containerId) {
+    const chartData = [['Tahun', 'Jawa Timur', { role: 'annotation' }, 'Nasional', { role: 'annotation' }]];
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (row.length >= 3) {
+        const year = row[0];
+        const jumlahpendudukmenurutpendidikanJatim = parseFloat(row[1]);
+        const jumlahpendudukmenurutpendidikanNasional = parseFloat(row[2]);
+        chartData.push([year, jumlahpendudukmenurutpendidikanJatim, jumlahpendudukmenurutpendidikanJatim.toString(), jumlahpendudukmenurutpendidikanNasional, jumlahpendudukmenurutpendidikanNasional.toString()]);
+      }
+    }
+
+    const googleData = google.visualization.arrayToDataTable(chartData);
+
+    const options = {
+      title: 'Perbandingan Jumlah Penduduk Menurut Pendidikan Jawa Timur dan Nasional',
+      hAxis: { title: 'Tahun' },
+      vAxis: { title: 'Jumlah Penduduk Menurut Pendidikan' },
+      legend: { position: 'bottom' },
+      height: 400,
+      width: 1200,
+      chartArea: { height: '70%', width: '80%', left: '10%', top: '10%' },
+      annotations: {
+        alwaysOutside: true,
+        textStyle: { fontSize: 12, color: '#000', auraColor: 'none' }
+      },
+      bar: { groupWidth: '70%' }
+    };
+
+    const chart = new google.visualization.ColumnChart(document.getElementById(containerId));
+    chart.draw(googleData, options);
+  }
+
+  // Fungsi untuk mengambil dan menampilkan data CSV untuk bar chart
+  function fetchAndDisplayBarChart() {
+    const fileName = 'Jumlah Penduduk Menurut Pendidikan Jatim Nasional.csv';
+    const storageRef = storage.ref(fileName);
+
+    storageRef.getDownloadURL().then(function(url) {
+      fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        const csvData = parseCSVData(data);
+        drawBarChart(csvData, 'bar_chart');
+      })
+      .catch(function(error) {
+        console.error(error);
+      });
+    }).catch(function(error) {
+      console.error(error);
+    });
+  }
+
+  // Fungsi untuk mengunduh template CSV
+  function downloadTemplateCSV() {
+    const fileName = 'Template Jumlah Penduduk Menurut Pendidikan.csv';
+    const storageRef = storage.ref(fileName);
+
+    storageRef.getDownloadURL().then(function(url) {
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }).catch(function(error) {
+      console.error('Error downloading template:', error);
+    });
+  }
+
+  // Fungsi untuk menampilkan tombol sort
+  function displaySortButtons() {
+    const sortButtonsDiv = document.createElement('div');
+    sortButtonsDiv.id = 'sort-buttons';
+
+    const ascendingButton = document.createElement('button');
+    ascendingButton.textContent = 'Sort Ascending';
+    ascendingButton.addEventListener('click', () => {
+      isSortedAscending = true;
+      drawChart(csvData, 'curve_chart', isSortedAscending);
+    });
+
+    const descendingButton = document.createElement('button');
+    descendingButton.textContent = 'Sort Descending';
+    descendingButton.addEventListener('click', () => {
+      isSortedAscending = false;
+      drawChart(csvData, 'curve_chart', isSortedAscending);
+    });
+
+    sortButtonsDiv.appendChild(ascendingButton);
+    sortButtonsDiv.appendChild(descendingButton);
+
+    document.getElementById('csvData').appendChild(sortButtonsDiv); // Tambahkan di bawah tabel
+  }
+
   // Muat Google Charts
   google.charts.load('current', { packages: ['corechart'] });
+  google.charts.setOnLoadCallback(() => {
+    fetchAndDisplayBarChart();
+  });
 
   // Tampilkan tombol-tombol untuk tahun yang tersedia
   displayYearButtons();
@@ -514,15 +665,10 @@ document.addEventListener("DOMContentLoaded", function() {
 </head>
 <body>
 
-
-
-<h1>Data CSV</h1>
-<div id="uploadedData"></div>
+<center><h1>Data CSV</h1></center>
 <div id="csvData"></div>
-
-<h2>Visualisasi Data</h2>
-  <div id="curve_chart" style="width: 100%; height: 1200px"></div>
-</div>
+<div id="curve_chart" style="width: 100%; height: 800px;"></div>
+<div id="bar_chart" style="width: 100%; height: 400px;"></div>
 
 </body>
 </html>
